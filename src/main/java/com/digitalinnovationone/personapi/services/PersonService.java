@@ -3,10 +3,15 @@ package com.digitalinnovationone.personapi.services;
 import com.digitalinnovationone.personapi.dto.request.PersonDTO;
 import com.digitalinnovationone.personapi.dto.response.MessageResponseDTO;
 import com.digitalinnovationone.personapi.entitys.Person;
+import com.digitalinnovationone.personapi.exceptions.PersonNotFoundException;
 import com.digitalinnovationone.personapi.mapper.PersonMapper;
 import com.digitalinnovationone.personapi.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
@@ -38,5 +43,28 @@ public class PersonService {
                 .builder()
                 .message("Created person with ID " + savedPerson.getId())
                 .build();
+    }
+
+
+    public List<PersonDTO> listAll(){
+        List<Person> allPeople = personRepository.findAll();
+
+        return allPeople.stream()
+                .map(personMapper::toDTO) // Vai converter
+                .collect(Collectors.toList());
+    }
+
+    public PersonDTO findById(Long id) throws PersonNotFoundException{
+//        Pode fazer assim
+//        Optional<Person> optionalPerson = personRepository.findById(id);
+//        if(optionalPerson.isEmpty()){
+//            throw new PersonNotFoundException(id);
+//        }
+//        ou assim:
+
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new PersonNotFoundException(id));
+
+        return personMapper.toDTO(person);
     }
 }
